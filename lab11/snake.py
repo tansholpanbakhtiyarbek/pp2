@@ -1,6 +1,7 @@
 import pygame
 import random
 import sys
+import time
 
 pygame.init()
 
@@ -17,39 +18,74 @@ font = pygame.font.SysFont(None, 36)
 # ---------------- COLORS ----------------
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-GREEN = (0, 200, 0)
-RED = (220, 0, 0)
-GRAY = (40, 40, 40)
 
-# ---------------- GAME RESET ----------------
+HEAD_COLOR = (0, 255, 0)
+BODY_COLOR = (0, 180, 0)
+
+FOOD_COLORS = {
+    1: (255, 255, 0),   # yellow
+    3: (255, 140, 0),   # orange
+    5: (220, 0, 0)      # red
+}
+
+# ---------------- RESET ----------------
 def reset_game():
     snake = [(100, 100)]
     direction = (CELL, 0)
+
     food = spawn_food(snake)
 
     score = 0
     level = 1
     speed = 4
 
-    return snake, direction, food, score, level, speed
+    growth = 0  # pending growth
+
+    return snake, direction, food, score, level, speed, growth
 
 
+# ---------------- FOOD ----------------
 def spawn_food(snake):
     while True:
         x = random.randrange(0, WIDTH, CELL)
         y = random.randrange(0, HEIGHT, CELL)
+
         if (x, y) not in snake:
-            return (x, y)
+            value = random.choice([1, 3, 5])
+
+            # lifetime rules
+            if value == 5:
+                lifetime = 5
+            else:
+                lifetime = 7
+
+            # growth mapping (IMPORTANT)
+            if value == 1:
+                growth_value = 1
+            elif value == 3:
+                growth_value = 2
+            else:
+                growth_value = 3
+
+            return {
+                "pos": (x, y),
+                "value": value,
+                "growth": growth_value,
+                "time": time.time(),
+                "lifetime": lifetime
+            }
 
 
+# ---------------- TEXT ----------------
 def draw_text(text, x, y):
     img = font.render(text, True, WHITE)
     screen.blit(img, (x, y))
 
 
-# ---------------- INIT GAME ----------------
-snake, direction, food, score, level, speed = reset_game()
+# ---------------- INIT ----------------
+snake, direction, food, score, level, speed, growth = reset_game()
 game_over = False
+
 
 # ---------------- MAIN LOOP ----------------
 while True:
@@ -61,15 +97,13 @@ while True:
             pygame.quit()
             sys.exit()
 
-        # ESC = quit
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 sys.exit()
 
-            # RESTART KEY
             if game_over and event.key == pygame.K_r:
-                snake, direction, food, score, level, speed = reset_game()
+                snake, direction, food, score, level, speed, growth = reset_game()
                 game_over = False
 
     # -------- INPUT --------
@@ -104,24 +138,36 @@ while True:
         else:
             snake.insert(0, new_head)
 
-            # eat food
-            if new_head == food:
-                score += 1
+            # -------- EAT FOOD --------
+            if new_head == food["pos"]:
+                score += food["value"]          # points
+                growth += food["growth"]        # size growth
+
                 food = spawn_food(snake)
 
+                # level system
                 if score % 3 == 0:
                     level += 1
                     speed += 1
+
+            # -------- GROWTH SYSTEM --------
+            if growth > 0:
+                growth -= 1
             else:
                 snake.pop()
 
+        # -------- FOOD TIMER --------
+        if time.time() - food["time"] > food["lifetime"]:
+            food = spawn_food(snake)
+
     # -------- DRAW SNAKE --------
     for i, (x, y) in enumerate(snake):
-        color = GRAY if i == 0 else (0, 140, 0)
+        color = HEAD_COLOR if i == 0 else BODY_COLOR
         pygame.draw.rect(screen, color, (x, y, CELL, CELL))
 
     # -------- DRAW FOOD --------
-    pygame.draw.rect(screen, RED, (food[0], food[1], CELL, CELL))
+    color = FOOD_COLORS[food["value"]]
+    pygame.draw.rect(screen, color, (food["pos"][0], food["pos"][1], CELL, CELL))
 
     # -------- UI --------
     draw_text(f"Score: {score}", 10, 10)
