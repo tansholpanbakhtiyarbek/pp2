@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Aigerim",
+        "email": "aigerim@gmail.com",
+        "birthday": "2006-08-15",
+        "group": "Friend",
+        "phones": [
+            {
+                "phone": "87001112233",
+                "type": "mobile"
+            }
+        ]
+    }
+]

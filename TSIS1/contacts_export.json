@@ -1,0 +1,38 @@
+[
+    {
+        "name": "Aruzhan",
+        "email": "aruzhan@gmail.com",
+        "birthday": "2006-05-12",
+        "group": "Family",
+        "phones": [
+            {
+                "phone": "87005554433",
+                "type": "mobile"
+            }
+        ]
+    },
+    {
+        "name": "Dias",
+        "email": "dias@work.com",
+        "birthday": "2005-03-20",
+        "group": "Work",
+        "phones": [
+            {
+                "phone": "87007778899",
+                "type": "work"
+            }
+        ]
+    },
+    {
+        "name": "Nazerke",
+        "email": "nazerke@gmail.com",
+        "birthday": "2007-10-18",
+        "group": "Friend",
+        "phones": [
+            {
+                "phone": "87001234567",
+                "type": "mobile"
+            }
+        ]
+    }
+]
